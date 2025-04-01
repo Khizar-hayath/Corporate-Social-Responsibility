@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1️⃣ Code Structure & File Organization
+Keep components small & reusable. Each component should handle one responsibility.
+
+Separate concerns:
+
+components/ → Reusable UI components
+
+pages/ → Page-level components
+
+hooks/ → Custom hooks
+
+utils/ → Helper functions
+
+context/ → Global state management
+
+assets/ → Images, icons, styles
+
+styles/ → Global styles, Tailwind or CSS Modules
+
+2️⃣ Component Guidelines
+✅ Use functional components with React hooks instead of class components.
+✅ Extract logic into custom hooks (hooks/useFetch.js, hooks/useAuth.js).
+✅ Avoid deeply nested components, split them into separate files.
+✅ Use props & state efficiently, avoid unnecessary re-renders.
+
+3️⃣ Naming Conventions
+📌 Files & folders: Use camelCase for functions, PascalCase for components (Button.jsx).
+📌 State variables: Use meaningful names (isLoading ✅, x ❌).
+📌 Avoid abbreviations that reduce readability (fetchUserData() ✅, fUd() ❌).
+
+4️⃣ State Management
+Local state: Use useState for simple component-level state.
+
+Context API: Use for shared app-wide state.
+
+Redux/Zustand (if needed): For complex state logic.
+
+Avoid prop drilling by lifting state up or using context.
+
+5️⃣ API & Data Handling
+Use fetch or Axios for API requests (utils/api.js).
+
+Separate API calls into a dedicated file (services/api.js).
+
+Handle loading, error, and success states properly.
+
+6️⃣ Animations & UI
+Use Framer Motion or GSAP for animations & transitions.
+
+Keep UI smooth & engaging and let it have excessive animations.Keep a wow factor on the main page.
+
+Ensure responsive design with Tailwind CSS or styled-components.
+
+7️⃣ Performance Optimization
+Use lazy loading (React.lazy) for components.
+
+Optimize images with Next-gen formats (WebP).
+
+Use useMemo & useCallback to prevent unnecessary re-renders.
+
+8️⃣ Code Cleanliness & Formatting
+Use ESLint & Prettier for consistent formatting.
+
+Follow DRY principle (Don’t Repeat Yourself).
+
+Comment complex logic, but avoid over-commenting obvious code
