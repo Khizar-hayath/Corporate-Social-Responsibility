@@ -18,11 +18,16 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));
 
-// Routes
+// Public API Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/news', require('./routes/news'));
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/volunteers', require('./routes/volunteers'));
-app.use('/api/contact', require('./routes/contact'));
+app.use('/api/projects', require('./routes/publicProjects'));
+
+// Admin Routes (protected)
+app.use('/admin/projects', require('./routes/projects'));
+app.use('/admin/news', require('./routes/news'));
+app.use('/admin/volunteers', require('./routes/volunteers'));
+app.use('/admin/contact', require('./routes/contact'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -34,4 +39,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-}); 
+});

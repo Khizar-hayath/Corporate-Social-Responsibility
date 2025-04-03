@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import { FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
+import { useAuth } from '../../context/AuthContext';
+import { FiMenu, FiX, FiSun, FiMoon, FiUser, FiLogOut } from 'react-icons/fi';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,13 +22,18 @@ function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/about', label: 'About' },
-    { path: '/projects', label: 'Projects' },
-    { path: '/news', label: 'News' },
-    { path: '/get-involved', label: 'Get Involved' },
-    { path: '/contact', label: 'Contact' },
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+    { name: 'Projects', path: '/projects' },
+    { name: 'News', path: '/news' },
+    { name: 'Get Involved', path: '/get-involved' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
@@ -53,7 +61,7 @@ function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
-                key={link.path}
+                key={link.name}
                 to={link.path}
                 className={`text-sm font-medium transition-colors relative ${
                   location.pathname === link.path
@@ -61,7 +69,7 @@ function Navbar() {
                     : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
                 }`}
               >
-                {link.label}
+                {link.name}
                 {location.pathname === link.path && (
                   <motion.div
                     className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-600 dark:bg-primary-400"
@@ -83,6 +91,43 @@ function Navbar() {
                 <FiMoon className="w-5 h-5 text-gray-700" />
               )}
             </motion.button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">
+                  Welcome, {user.name}
+                </span>
+                {user.userType === 'ngo' && (
+                  <Link
+                    to="/admin/projects"
+                    className="text-sm text-indigo-600 hover:text-indigo-500"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <FiLogOut className="mr-2" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/login"
+                  className="text-sm text-gray-700 hover:text-gray-900"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -125,7 +170,7 @@ function Navbar() {
         <div className="px-4 pt-2 pb-4 space-y-1">
           {navLinks.map((link) => (
             <Link
-              key={link.path}
+              key={link.name}
               to={link.path}
               onClick={() => setIsOpen(false)}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
@@ -134,9 +179,57 @@ function Navbar() {
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               }`}
             >
-              {link.label}
+              {link.name}
             </Link>
           ))}
+          {user ? (
+            <>
+              <div className="border-t border-gray-200 pt-4 pb-3">
+                <div className="flex items-center px-4">
+                  <div className="flex-shrink-0">
+                    <FiUser className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-800">
+                      {user.name}
+                    </div>
+                    <div className="text-sm font-medium text-gray-500">
+                      {user.organization}
+                    </div>
+                  </div>
+                </div>
+                {user.userType === 'ngo' && (
+                  <Link
+                    to="/admin/projects"
+                    className="block px-4 py-2 text-base font-medium text-indigo-600 hover:text-indigo-500 hover:bg-gray-50"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="border-t border-gray-200 pt-4 pb-3">
+              <Link
+                to="/login"
+                className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="block px-4 py-2 text-base font-medium text-indigo-600 hover:text-indigo-500 hover:bg-gray-50"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       </motion.div>
     </nav>

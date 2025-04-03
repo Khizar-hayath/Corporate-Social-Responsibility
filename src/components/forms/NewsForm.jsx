@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { API_BASE_URL } from '../../config';
 
 function NewsForm() {
   const [formData, setFormData] = useState({
@@ -23,14 +24,15 @@ function NewsForm() {
     setStatus({ loading: true, success: false, error: null });
 
     try {
-      const response = await fetch('http://localhost:5000/api/news', {
+      console.log('Submitting news data:', formData);
+      const response = await fetch(`${API_BASE_URL}/news`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
-          tags: formData.tags.split(',').map(tag => tag.trim()),
+          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
         }),
       });
 
@@ -49,6 +51,7 @@ function NewsForm() {
         throw new Error('Failed to submit news article');
       }
     } catch (error) {
+      console.error('Error submitting news:', error);
       setStatus({ loading: false, success: false, error: error.message });
     }
   };

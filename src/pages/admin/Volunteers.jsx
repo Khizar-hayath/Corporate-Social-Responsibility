@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { API_BASE_URL } from '../../config';
 
 function Volunteers() {
   const [volunteers, setVolunteers] = useState([]);
@@ -12,7 +13,7 @@ function Volunteers() {
 
   const fetchVolunteers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/volunteers');
+      const response = await fetch(`${API_BASE_URL}/volunteers`);
       const data = await response.json();
       setVolunteers(data);
     } catch (error) {
@@ -22,7 +23,7 @@ function Volunteers() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/volunteers/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/volunteers/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +42,7 @@ function Volunteers() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this volunteer?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/volunteers/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/volunteers/${id}`, {
           method: 'DELETE',
         });
         if (response.ok) {

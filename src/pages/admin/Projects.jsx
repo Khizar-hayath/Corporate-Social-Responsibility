@@ -1,110 +1,175 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
+import { API_BASE_URL } from '../../config';
+import ProjectTable from './components/projects/ProjectTable';
+import ProjectForm from './components/projects/ProjectForm';
+import ProjectFilters from './components/projects/ProjectFilters';
 
-function Projects() {
+/**
+ * Admin Projects Management Page
+ * 
+ * Features:
+ * - View all projects in a table
+ * - Search and filter projects
+ * - Create, edit, and delete projects
+ * - Preview projects
+ */
+function AdminProjects() {
+  // State management
   const [projects, setProjects] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: 'education',
-    status: 'Active',
-    location: '',
-    impact: '',
-    image: '',
-    tags: '',
-    startDate: '',
-    endDate: '',
-    budget: ''
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [status, setStatus] = useState('all');
 
+  // Fetch projects when component mounts or dependencies change
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [category, status]);
 
+  /**
+   * Fetch projects from the API
+   */
   const fetchProjects = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/projects');
+      // Construct query parameters for filtering
+      const queryParams = new URLSearchParams();
+      if (category !== 'all') queryParams.append('category', category);
+      if (status !== 'all') queryParams.append('status', status);
+      
+      const response = await fetch(`${API_BASE_URL}/admin/projects?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+      
       const data = await response.json();
       setProjects(data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setError('Failed to load projects. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /**
+   * Handle form submission for creating or updating a project
+   */
+  const handleSubmit = async (projectData) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      // Process dates and numbers
+      const processedData = {
+        ...projectData,
+        budget: Number(projectData.budget),
+        startDate: new Date(projectData.startDate),
+        endDate: projectData.endDate ? new Date(projectData.endDate) : null,
+      };
+
       const url = editingProject
-        ? `http://localhost:5000/api/projects/${editingProject._id}`
-        : 'http://localhost:5000/api/projects';
-      
+        ? `${API_BASE_URL}/admin/projects/${editingProject._id}`
+        : `${API_BASE_URL}/admin/projects`;
       const method = editingProject ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'x-auth-token': token
         },
-        body: JSON.stringify({
-          ...formData,
-          tags: formData.tags.split(',').map(tag => tag.trim()),
-          budget: parseFloat(formData.budget),
-          startDate: new Date(formData.startDate),
-          endDate: formData.endDate ? new Date(formData.endDate) : null
-        }),
+        body: JSON.stringify(processedData),
       });
 
-      if (response.ok) {
-        setIsModalOpen(false);
-        setEditingProject(null);
-        setFormData({
-          title: '',
-          description: '',
-          category: 'education',
-          status: 'Active',
-          location: '',
-          impact: '',
-          image: '',
-          tags: '',
-          startDate: '',
-          endDate: '',
-          budget: ''
-        });
-        fetchProjects();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save project');
       }
-    } catch (error) {
-      console.error('Error saving project:', error);
+
+      // Refresh the projects list
+      await fetchProjects();
+      
+      // Reset form state
+      setShowForm(false);
+      setEditingProject(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error saving project:', err);
     }
   };
 
+  /**
+   * Handle editing a project
+   */
   const handleEdit = (project) => {
     setEditingProject(project);
-    setFormData({
-      ...project,
-      tags: project.tags.join(', '),
-      startDate: new Date(project.startDate).toISOString().split('T')[0],
-      endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
-      budget: project.budget.toString()
-    });
-    setIsModalOpen(true);
+    setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/projects/${id}`, {
-          method: 'DELETE',
-        });
-        if (response.ok) {
-          fetchProjects();
-        }
-      } catch (error) {
-        console.error('Error deleting project:', error);
-      }
+  /**
+   * Handle deleting a project
+   */
+  const handleDelete = async (projectId) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) {
+      return;
     }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/admin/projects/${projectId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-auth-token': token
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete project');
+      }
+
+      // Refresh the projects list
+      await fetchProjects();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error deleting project:', err);
+    }
+  };
+
+  /**
+   * Filter projects based on search query and other filters
+   */
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.location.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
+
+  /**
+   * Handle previewing a project (redirect to public view)
+   */
+  const handlePreview = (project) => {
+    // Open in a new tab
+    window.open(`/projects/${project._id}`, '_blank');
   };
 
   return (
@@ -114,20 +179,7 @@ function Projects() {
         <button
           onClick={() => {
             setEditingProject(null);
-            setFormData({
-              title: '',
-              description: '',
-              category: 'education',
-              status: 'Active',
-              location: '',
-              impact: '',
-              image: '',
-              tags: '',
-              startDate: '',
-              endDate: '',
-              budget: ''
-            });
-            setIsModalOpen(true);
+            setShowForm(true);
           }}
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
@@ -136,213 +188,77 @@ function Projects() {
         </button>
       </div>
 
-      {/* Projects List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {projects.map((item) => (
-              <tr key={item._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">{item.title}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">{item.description}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
-                    {item.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    item.status === 'Active' ? 'bg-green-100 text-green-800' :
-                    item.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {item.location}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-primary-600 hover:text-primary-900 mr-4"
-                  >
-                    <FiEdit2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <FiTrash2 className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6"
-          >
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-              {editingProject ? 'Edit Project' : 'Add Project'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  rows="3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <option value="education">Education</option>
-                    <option value="environment">Environment</option>
-                    <option value="health">Health</option>
-                    <option value="community">Community</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Planned">Planned</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Impact</label>
-                <textarea
-                  value={formData.impact}
-                  onChange={(e) => setFormData({ ...formData, impact: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  rows="2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL</label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Budget</label>
-                  <input
-                    type="number"
-                    value={formData.budget}
-                    onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  {editingProject ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </form>
-          </motion.div>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          {error}
         </div>
       )}
+
+      {/* Filters and Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search projects..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <ProjectFilters 
+            category={category}
+            setCategory={setCategory}
+            status={status}
+            setStatus={setStatus}
+          />
+        </div>
+      </div>
+
+      {/* Project Form */}
+      {showForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6"
+        >
+          <ProjectForm
+            project={editingProject}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingProject(null);
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Projects Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+          </div>
+        ) : filteredProjects.length > 0 ? (
+          <ProjectTable 
+            projects={filteredProjects} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete} 
+            onPreview={handlePreview}
+          />
+        ) : (
+          <div className="text-center p-8 text-gray-500 dark:text-gray-400">
+            No projects found. {searchQuery && 'Try adjusting your search criteria.'}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default Projects; 
+export default AdminProjects; 

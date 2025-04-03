@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { API_BASE_URL } from '../../config';
 
 function Contact() {
   const [messages, setMessages] = useState([]);
@@ -12,7 +13,7 @@ function Contact() {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/contact');
+      const response = await fetch(`${API_BASE_URL}/contact`);
       const data = await response.json();
       setMessages(data);
     } catch (error) {
@@ -22,7 +23,7 @@ function Contact() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/contact/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/contact/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +42,7 @@ function Contact() {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this message?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/contact/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/contact/${id}`, {
           method: 'DELETE',
         });
         if (response.ok) {

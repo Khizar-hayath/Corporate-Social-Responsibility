@@ -49,7 +49,12 @@ const projectSchema = new mongoose.Schema({
   volunteers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Volunteer'
-  }]
+  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
 }, {
   timestamps: true
 });

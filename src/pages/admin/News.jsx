@@ -1,97 +1,159 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
+import { API_BASE_URL } from '../../config';
+import NewsTable from './components/news/NewsTable';
+import NewsForm from './components/news/NewsForm';
+import NewsFilters from './components/news/NewsFilters';
 
-function News() {
-  const [news, setNews] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+/**
+ * Admin News Management Page
+ * 
+ * Features:
+ * - View all news articles in a table
+ * - Search and filter news articles
+ * - Create, edit, and delete news articles
+ * - Preview news articles
+ */
+function AdminNews() {
+  // State management
+  const [newsItems, setNewsItems] = useState([]);
+  const [showForm, setShowForm] = useState(false);
   const [editingNews, setEditingNews] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: 'press',
-    author: '',
-    image: '',
-    tags: ''
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [view, setView] = useState('active'); // 'active', 'draft', 'archived'
 
+  // Fetch news articles when component mounts or dependencies change
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [category, view]);
 
+  /**
+   * Fetch news articles from the API
+   */
   const fetchNews = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/news');
+      // Construct query parameters for filtering
+      const queryParams = new URLSearchParams();
+      if (category !== 'all') queryParams.append('category', category);
+      if (view !== 'all') queryParams.append('status', view);
+      
+      const response = await fetch(`${API_BASE_URL}/admin/news?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch news articles');
+      }
+      
       const data = await response.json();
-      setNews(data);
-    } catch (error) {
-      console.error('Error fetching news:', error);
+      setNewsItems(data);
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      setError('Failed to load news articles. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /**
+   * Handle form submission for creating or updating a news article
+   */
+  const handleSubmit = async (newsData) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
       const url = editingNews
-        ? `http://localhost:5000/api/news/${editingNews._id}`
-        : 'http://localhost:5000/api/news';
-      
+        ? `${API_BASE_URL}/admin/news/${editingNews._id}`
+        : `${API_BASE_URL}/admin/news`;
       const method = editingNews ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'x-auth-token': token
         },
-        body: JSON.stringify({
-          ...formData,
-          tags: formData.tags.split(',').map(tag => tag.trim()),
-        }),
+        body: JSON.stringify(newsData),
       });
 
-      if (response.ok) {
-        setIsModalOpen(false);
-        setEditingNews(null);
-        setFormData({
-          title: '',
-          excerpt: '',
-          content: '',
-          category: 'press',
-          author: '',
-          image: '',
-          tags: ''
-        });
-        fetchNews();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save news article');
       }
-    } catch (error) {
-      console.error('Error saving news:', error);
+
+      // Refresh the news list
+      await fetchNews();
+      
+      // Reset form state
+      setShowForm(false);
+      setEditingNews(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error saving news:', err);
     }
   };
 
-  const handleEdit = (newsItem) => {
-    setEditingNews(newsItem);
-    setFormData({
-      ...newsItem,
-      tags: newsItem.tags.join(', ')
-    });
-    setIsModalOpen(true);
+  /**
+   * Handle editing a news article
+   */
+  const handleEdit = (news) => {
+    setEditingNews(news);
+    setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this news article?')) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/news/${id}`, {
+  /**
+   * Handle deleting a news article
+   */
+  const handleDelete = async (newsId) => {
+    if (!window.confirm('Are you sure you want to delete this news article?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/admin/news/${newsId}`,
+        {
           method: 'DELETE',
-        });
-        if (response.ok) {
-          fetchNews();
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-auth-token': token
+          },
         }
-      } catch (error) {
-        console.error('Error deleting news:', error);
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete news article');
       }
+
+      // Refresh the news list
+      await fetchNews();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error deleting news:', err);
     }
   };
+
+  /**
+   * Filter news articles based on search query and other filters
+   */
+  const filteredNews = newsItems.filter((news) => {
+    const matchesSearch = news.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      news.content.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div>
@@ -100,178 +162,85 @@ function News() {
         <button
           onClick={() => {
             setEditingNews(null);
-            setFormData({
-              title: '',
-              excerpt: '',
-              content: '',
-              category: 'press',
-              author: '',
-              image: '',
-              tags: ''
-            });
-            setIsModalOpen(true);
+            setShowForm(true);
           }}
           className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
           <FiPlus className="w-5 h-5 mr-2" />
-          Add News
+          Add News Article
         </button>
       </div>
 
-      {/* News List */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {news.map((item) => (
-              <tr key={item._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">{item.title}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">{item.excerpt}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
-                    {item.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {item.author}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(item.date).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-primary-600 hover:text-primary-900 mr-4"
-                  >
-                    <FiEdit2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <FiTrash2 className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6"
-          >
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-              {editingNews ? 'Edit News' : 'Add News'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Excerpt</label>
-                <textarea
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  rows="2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  rows="4"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                >
-                  <option value="press">Press Release</option>
-                  <option value="updates">Updates</option>
-                  <option value="stories">Success Stories</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Author</label>
-                <input
-                  type="text"
-                  value={formData.author}
-                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image URL</label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                />
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                >
-                  {editingNews ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </form>
-          </motion.div>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+          {error}
         </div>
       )}
+
+      {/* Filters and Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search news articles..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <NewsFilters 
+            category={category}
+            setCategory={setCategory}
+            view={view}
+            setView={setView}
+          />
+        </div>
+      </div>
+
+      {/* News Form */}
+      {showForm && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6"
+        >
+          <NewsForm
+            news={editingNews}
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingNews(null);
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* News Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+          </div>
+        ) : filteredNews.length > 0 ? (
+          <NewsTable 
+            news={filteredNews} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete} 
+          />
+        ) : (
+          <div className="text-center p-8 text-gray-500 dark:text-gray-400">
+            No news articles found. {searchQuery && 'Try adjusting your search criteria.'}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default News; 
+export default AdminNews; 
