@@ -153,6 +153,54 @@ function Projects() {
             </div>
           </div>
 
+          {/* Project Form - Only visible for NGO users */}
+          {user?.userType === 'ngo' && (
+            <div className="mt-12 mb-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
+                  Submit a New Project
+                </h2>
+                <button
+                  onClick={() => {
+                    setEditingProject(null);
+                    setShowForm(true);
+                  }}
+                  className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                >
+                  {showForm ? (
+                    <>
+                      <FiX className="w-5 h-5 mr-2" />
+                      Cancel
+                    </>
+                  ) : (
+                    <>
+                      <FiPlus className="w-5 h-5 mr-2" />
+                      Submit Project
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {showForm && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mt-8"
+                >
+                  <ProjectForm
+                    project={editingProject}
+                    onSubmit={handleSubmit}
+                    onCancel={() => {
+                      setShowForm(false);
+                      setEditingProject(null);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </div>
+          )}
+
           {/* Projects Grid */}
           <motion.div
             ref={projectsRef}
@@ -244,54 +292,6 @@ function Projects() {
               </motion.div>
             ))}
           </motion.div>
-
-          {/* Project Form - Only visible for NGO users */}
-          {user?.userType === 'ngo' && (
-            <div className="mt-12">
-              <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
-                  Submit a New Project
-                </h2>
-                <button
-                  onClick={() => {
-                    setEditingProject(null);
-                    setShowForm(true);
-                  }}
-                  className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                >
-                  {showForm ? (
-                    <>
-                      <FiX className="w-5 h-5 mr-2" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <FiPlus className="w-5 h-5 mr-2" />
-                      Submit Project
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {showForm && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="mt-8"
-                >
-                  <ProjectForm
-                    project={editingProject}
-                    onSubmit={handleSubmit}
-                    onCancel={() => {
-                      setShowForm(false);
-                      setEditingProject(null);
-                    }}
-                  />
-                </motion.div>
-              )}
-            </div>
-          )}
         </div>
       </section>
     </PageTransition>

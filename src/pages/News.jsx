@@ -4,6 +4,7 @@ import { useInView } from 'react-intersection-observer';
 import PageTransition from '../components/layout/PageTransition';
 import { FiCalendar, FiUser, FiTag, FiArrowRight, FiPlus, FiX } from 'react-icons/fi';
 import NewsForm from '../components/forms/NewsForm';
+import { useAuth } from '../context/AuthContext';
 
 function News() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -14,6 +15,7 @@ function News() {
   });
   const [news, setNews] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const { user } = useAuth();
 
   const categories = [
     { id: 'all', label: 'All News' },
@@ -43,39 +45,29 @@ function News() {
     return matchesCategory && matchesSearch;
   });
 
+  // Check if user can submit news (admin or NGO)
+  const canSubmitNews = user && (user.userType === 'admin' || user.userType === 'ngo');
+
   return (
     <PageTransition>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">News & Updates</h1>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            {showForm ? (
-              <>
-                <FiX className="w-5 h-5 mr-2" />
-                Cancel
-              </>
-            ) : (
-              <>
-                <FiPlus className="w-5 h-5 mr-2" />
-                Submit News
-              </>
-            )}
-          </button>
-        </div>
-
-        {showForm && (
+      {/* Hero Section */}
+      <section className="relative py-20 bg-gray-50 dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mb-8"
+            transition={{ duration: 0.8 }}
+            className="text-center"
           >
-            <NewsForm />
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              News & Updates
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Stay informed about our latest initiatives, success stories, and organizational updates.
+            </p>
           </motion.div>
-        )}
+        </div>
+      </section>
 
         {/* News Section */}
         <section className="py-20 bg-white dark:bg-gray-900">
@@ -111,6 +103,45 @@ function News() {
                 </div>
               </div>
             </div>
+
+            {canSubmitNews && (
+              <div className="mt-12 mb-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
+                  Submit a New Project
+                </h2>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowForm(!showForm)}
+                    className="mt-6 inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  >
+                    {showForm ? (
+                      <>
+                        <FiX className="w-5 h-5 mr-2" />
+                        Cancel
+                      </>
+                    ) : (
+                      <>
+                        <FiPlus className="w-5 h-5 mr-2" />
+                        Submit News
+                      </>
+                    )}
+                  </motion.button>
+              </div>
+              </div>
+            )}
+
+         {showForm && canSubmitNews && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+          >
+            <NewsForm />
+          </motion.div>
+        )}
 
             {/* News Grid */}
             <motion.div
@@ -177,7 +208,6 @@ function News() {
             </motion.div>
           </div>
         </section>
-      </div>
     </PageTransition>
   );
 }

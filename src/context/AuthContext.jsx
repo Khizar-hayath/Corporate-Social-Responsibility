@@ -40,10 +40,12 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
 
       // Redirect based on user type
-      if (user.userType === 'ngo') {
-        navigate('/admin/projects');
+      if (user.userType === 'admin') {
+        navigate('/admin'); // Admin dashboard
+      } else if (user.userType === 'ngo') {
+        navigate('/account/projects'); // NGO project management in the main site
       } else {
-        navigate('/projects');
+        navigate('/projects'); // Regular users go to projects page
       }
 
       return response.data;
@@ -64,10 +66,12 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
 
       // Redirect based on user type
-      if (user.userType === 'ngo') {
-        navigate('/admin/projects');
+      if (user.userType === 'admin') {
+        navigate('/admin'); // Admin dashboard
+      } else if (user.userType === 'ngo') {
+        navigate('/account/projects'); // NGO project management in the main site
       } else {
-        navigate('/projects');
+        navigate('/projects'); // Regular users go to projects page
       }
 
       return response.data;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../../config';
+import { useAuth } from '../../context/AuthContext';
 
 function NewsForm() {
   const [formData, setFormData] = useState({
@@ -19,37 +20,47 @@ function NewsForm() {
     error: null
   });
 
+  const { user } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ loading: true, success: false, error: null });
 
     try {
-      console.log('Submitting news data:', formData);
-      const response = await fetch(`${API_BASE_URL}/news`, {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/news`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'x-auth-token': token
         },
         body: JSON.stringify({
           ...formData,
-          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+          author: user.name || formData.author // Use logged-in user's name as author if available
         }),
       });
 
-      if (response.ok) {
-        setStatus({ loading: false, success: true, error: null });
-        setFormData({
-          title: '',
-          excerpt: '',
-          content: '',
-          category: 'press',
-          author: '',
-          image: '',
-          tags: ''
-        });
-      } else {
-        throw new Error('Failed to submit news article');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit news article');
       }
+
+      setStatus({ loading: false, success: true, error: null });
+      setFormData({
+        title: '',
+        excerpt: '',
+        content: '',
+        category: 'press',
+        author: '',
+        image: '',
+        tags: ''
+      });
     } catch (error) {
       console.error('Error submitting news:', error);
       setStatus({ loading: false, success: false, error: error.message });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiHome, FiFileText, FiUsers, FiMessageSquare, FiSettings, FiLogOut, FiChevronLeft } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiFileText, FiUsers, FiMessageSquare, FiSettings, FiLogOut, FiChevronLeft, FiUserPlus } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 
 function AdminLayout() {
@@ -9,7 +9,12 @@ function AdminLayout() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const isAdmin = user?.userType === 'admin';
+  const isNGO = user?.userType === 'ngo';
+
+  // Determine if we're in the admin or NGO section
+  const basePath = isAdmin ? '/admin' : '/ngo';
 
   // Close sidebar by default on mobile
   useEffect(() => {
@@ -32,14 +37,23 @@ function AdminLayout() {
     navigate('/');
   };
 
-  const menuItems = [
-    { path: '/admin', label: 'Dashboard', icon: FiHome },
-    { path: '/admin/news', label: 'News', icon: FiFileText },
-    { path: '/admin/projects', label: 'Projects', icon: FiFileText },
-    { path: '/admin/volunteers', label: 'Volunteers', icon: FiUsers },
-    { path: '/admin/contact', label: 'Messages', icon: FiMessageSquare },
-    { path: '/admin/settings', label: 'Settings', icon: FiSettings },
+  // Common menu items for both NGOs and admins
+  const commonMenuItems = [
+    { path: `${basePath}`, label: 'Dashboard', icon: FiHome },
+    { path: `${basePath}/news`, label: 'News', icon: FiFileText },
+    { path: `${basePath}/projects`, label: 'Projects', icon: FiFileText },
+    { path: `${basePath}/volunteers`, label: 'Volunteers', icon: FiUsers },
+    { path: `${basePath}/contact`, label: 'Messages', icon: FiMessageSquare },
+    { path: `${basePath}/settings`, label: 'Settings', icon: FiSettings },
   ];
+
+  // Admin-specific menu items
+  const adminMenuItems = [
+    { path: '/admin/users', label: 'Users', icon: FiUserPlus },
+  ];
+
+  // Combine the menu items based on user type
+  const menuItems = isAdmin ? [...commonMenuItems, ...adminMenuItems] : commonMenuItems;
 
   // Variants for the sidebar animation
   const sidebarVariants = {
@@ -86,7 +100,11 @@ function AdminLayout() {
         className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-800 shadow-lg z-20 overflow-hidden ${isMobile ? 'max-w-xs' : ''}`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
-          {isSidebarOpen && <h1 className="text-xl font-bold text-gray-800 dark:text-white">Admin Panel</h1>}
+          {isSidebarOpen && (
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+              {isAdmin ? 'Admin Panel' : 'NGO Dashboard'}
+            </h1>
+          )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -157,7 +175,9 @@ function AdminLayout() {
             <FiMenu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           </button>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600 dark:text-gray-300">Admin</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              {isAdmin ? 'Administrator' : 'NGO Manager'}: {user?.name}
+            </span>
             <button 
               onClick={handleLogout}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"

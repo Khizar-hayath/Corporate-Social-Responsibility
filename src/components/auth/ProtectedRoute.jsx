@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const ProtectedRoute = ({ children, requireNGO = false }) => {
+const ProtectedRoute = ({ children, requireNGO = false, requireAdmin = false }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -14,7 +14,15 @@ const ProtectedRoute = ({ children, requireNGO = false }) => {
   }
 
   if (!user) {
+    // Redirect to appropriate login page based on required role
+    if (requireAdmin) {
+      return <Navigate to="/admin/login" state={{ from: location }} replace />;
+    }
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requireAdmin && user.userType !== 'admin') {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   if (requireNGO && user.userType !== 'ngo') {

@@ -11,13 +11,17 @@ import GetInvolved from './pages/GetInvolved';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminLayout from './components/layout/AdminLayout';
+import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminNews from './pages/admin/News';
 import AdminProjects from './pages/admin/Projects';
 import AdminVolunteers from './pages/admin/Volunteers';
 import AdminContact from './pages/admin/Contact';
+import AdminUsers from './pages/admin/Users';
+import ProjectManagement from './pages/account/ProjectManagement';
 
 // Layout wrapper component that conditionally renders Navbar and Footer
 const AppLayout = () => {
@@ -54,12 +58,24 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              {/* NGO Project Management (accessible only to NGOs) */}
+              <Route
+                path="/account/projects"
+                element={
+                  <ProtectedRoute requireNGO>
+                    <ProjectManagement />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute requireNGO>
+                  <ProtectedRoute requireAdmin>
                     <AdminLayout />
                   </ProtectedRoute>
                 }
@@ -69,7 +85,7 @@ function App() {
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="volunteers" element={<AdminVolunteers />} />
                 <Route path="contact" element={<AdminContact />} />
-                <Route path="settings" element={<div>Settings page coming soon</div>} />
+                <Route path="users" element={<AdminUsers />} />
               </Route>
             </Route>
           </Routes>

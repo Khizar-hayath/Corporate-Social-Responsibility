@@ -34,7 +34,17 @@ const newsSchema = new mongoose.Schema({
   tags: [{
     type: String,
     trim: true
-  }]
+  }],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['published', 'draft', 'archived'],
+    default: 'published'
+  }
 }, {
   timestamps: true
 });

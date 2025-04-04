@@ -23,7 +23,14 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/news', require('./routes/news'));
 app.use('/api/projects', require('./routes/publicProjects'));
 
-// Admin Routes (protected)
+// NGO Routes (protected by regular auth)
+app.use('/ngo/projects', require('./routes/projects'));
+app.use('/ngo/news', require('./routes/news'));
+app.use('/ngo/volunteers', require('./routes/volunteers'));
+app.use('/ngo/contact', require('./routes/contact'));
+
+// Admin Routes (protected by admin auth)
+app.use('/admin', require('./routes/admin'));
 app.use('/admin/projects', require('./routes/projects'));
 app.use('/admin/news', require('./routes/news'));
 app.use('/admin/volunteers', require('./routes/volunteers'));
