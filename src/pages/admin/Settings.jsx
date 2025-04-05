@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdminSidebar from '../../components/layout/AdminSidebar';
-import VolunteersTable from './components/volunteers/VolunteersTable';
+import SettingsForm from './components/settings/SettingsForm';
 
-function Volunteers() {
+function Settings() {
   useEffect(() => {
-    document.title = 'Admin - Volunteers | CSR Website';
+    document.title = 'Admin - Settings | CSR Website';
   }, []);
 
   return (
@@ -20,18 +20,18 @@ function Volunteers() {
         >
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Volunteer Applications
+              Site Settings
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage volunteer applications submitted through the website
+              Configure system settings and preferences
             </p>
           </div>
           
-          <VolunteersTable />
+          <SettingsForm />
         </motion.div>
       </div>
     </div>
   );
 }
 
-export default Volunteers; 
+export default Settings; 

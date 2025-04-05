@@ -47,6 +47,13 @@ function Navbar() {
       };
     }
     
+    if (user.userType === 'ngo') {
+      return {
+        path: '/account/projects',
+        label: 'My Projects'
+      };
+    }
+    
     return null;
   };
 

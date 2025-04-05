@@ -63,8 +63,8 @@ function ProjectManagement() {
       setShowForm(false);
       setEditingProject(null);
     } catch (err) {
-      console.error('Error saving project:', err);
-      setError('Failed to save project. Please try again.');
+      //console.error('Error saving project:', err);
+      //setError('Failed to save project. Please try again.');
     }
   };
 
@@ -81,11 +81,21 @@ function ProjectManagement() {
     }
 
     try {
+      setLoading(true);
       await projectsAPI.delete(projectId);
+      setError('');
+      // Show success message
+      window.alert('Project successfully deleted');
       await fetchProjects();
     } catch (err) {
       console.error('Error deleting project:', err);
       setError('Failed to delete project. Please try again.');
+      // Show more detailed error if available
+      if (err.response?.data?.message) {
+        setError(`Failed to delete project: ${err.response.data.message}`);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,7 +129,7 @@ function ProjectManagement() {
 
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">My Projects</h1>
           <button

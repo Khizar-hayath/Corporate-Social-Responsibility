@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../../config';
 import ProjectTable from './components/projects/ProjectTable';
 import ProjectForm from './components/projects/ProjectForm';
 import ProjectFilters from './components/projects/ProjectFilters';
+import AdminSidebar from '../../components/layout/AdminSidebar';
 
 /**
  * Admin Projects Management Page
@@ -173,89 +174,98 @@ function AdminProjects() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Projects Management</h1>
-        <button
-          onClick={() => {
-            setEditingProject(null);
-            setShowForm(true);
-          }}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          <FiPlus className="w-5 h-5 mr-2" />
-          Add Project
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-          {error}
-        </div>
-      )}
-
-      {/* Filters and Search */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiSearch className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search projects..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <ProjectFilters 
-            category={category}
-            setCategory={setCategory}
-            status={status}
-            setStatus={setStatus}
-          />
-        </div>
-      </div>
-
-      {/* Project Form */}
-      {showForm && (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex">
+      <AdminSidebar />
+      <div className="flex-1 p-8 ml-64">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6"
+          transition={{ duration: 0.5 }}
         >
-          <ProjectForm
-            project={editingProject}
-            onSubmit={handleSubmit}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingProject(null);
-            }}
-          />
-        </motion.div>
-      )}
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Projects Management</h1>
+            <button
+              onClick={() => {
+                setEditingProject(null);
+                setShowForm(true);
+              }}
+              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            >
+              <FiPlus className="w-5 h-5 mr-2" />
+              Add Project
+            </button>
+          </div>
 
-      {/* Projects Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+              {error}
+            </div>
+          )}
+
+          {/* Filters and Search */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FiSearch className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search projects..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              <ProjectFilters 
+                category={category}
+                setCategory={setCategory}
+                status={status}
+                setStatus={setStatus}
+              />
+            </div>
           </div>
-        ) : filteredProjects.length > 0 ? (
-          <ProjectTable 
-            projects={filteredProjects} 
-            onEdit={handleEdit} 
-            onDelete={handleDelete} 
-            onPreview={handlePreview}
-          />
-        ) : (
-          <div className="text-center p-8 text-gray-500 dark:text-gray-400">
-            No projects found. {searchQuery && 'Try adjusting your search criteria.'}
+
+          {/* Project Form */}
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6"
+            >
+              <ProjectForm
+                project={editingProject}
+                onSubmit={handleSubmit}
+                onCancel={() => {
+                  setShowForm(false);
+                  setEditingProject(null);
+                }}
+              />
+            </motion.div>
+          )}
+
+          {/* Projects Table */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            {loading ? (
+              <div className="flex justify-center items-center p-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+              </div>
+            ) : filteredProjects.length > 0 ? (
+              <ProjectTable 
+                projects={filteredProjects} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+                onPreview={handlePreview}
+              />
+            ) : (
+              <div className="text-center p-8 text-gray-500 dark:text-gray-400">
+                No projects found. {searchQuery && 'Try adjusting your search criteria.'}
+              </div>
+            )}
           </div>
-        )}
+        </motion.div>
       </div>
     </div>
   );

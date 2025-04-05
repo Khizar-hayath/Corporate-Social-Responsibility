@@ -23,11 +23,13 @@ const contactSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['New', 'Read', 'Replied'],
-    default: 'New'
+    enum: ['pending', 'new', 'in-progress', 'resolved'],
+    default: 'pending'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
-}, {
-  timestamps: true
 });
 
 module.exports = mongoose.model('Contact', contactSchema); 

@@ -13,7 +13,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import AdminLayout from './components/layout/AdminLayout';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminNews from './pages/admin/News';
@@ -21,6 +20,7 @@ import AdminProjects from './pages/admin/Projects';
 import AdminVolunteers from './pages/admin/Volunteers';
 import AdminContact from './pages/admin/Contact';
 import AdminUsers from './pages/admin/Users';
+import AdminSettings from './pages/admin/Settings';
 import ProjectManagement from './pages/account/ProjectManagement';
 
 // Layout wrapper component that conditionally renders Navbar and Footer
@@ -72,21 +72,62 @@ function App() {
 
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin"
+              <Route 
+                path="/admin" 
                 element={
                   <ProtectedRoute requireAdmin>
-                    <AdminLayout />
+                    <AdminDashboard />
                   </ProtectedRoute>
-                }
-              >
-                <Route index element={<AdminDashboard />} />
-                <Route path="news" element={<AdminNews />} />
-                <Route path="projects" element={<AdminProjects />} />
-                <Route path="volunteers" element={<AdminVolunteers />} />
-                <Route path="contact" element={<AdminContact />} />
-                <Route path="users" element={<AdminUsers />} />
-              </Route>
+                } 
+              />
+              <Route 
+                path="/admin/news" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminNews />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/projects" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminProjects />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/volunteers" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminVolunteers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/contact" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminContact />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/users" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/settings" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                } 
+              />
             </Route>
           </Routes>
         </AuthProvider>

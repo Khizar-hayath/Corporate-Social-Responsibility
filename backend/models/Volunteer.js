@@ -9,33 +9,40 @@ const volunteerSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     lowercase: true
   },
   phone: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
-  volunteerType: {
+  skills: [{
+    type: String,
+    trim: true
+  }],
+  interests: [{
+    type: String,
+    trim: true
+  }],
+  availability: {
     type: String,
     required: true,
-    enum: ['Education', 'Environment', 'Healthcare', 'Community', 'Other']
+    enum: ['weekdays', 'weekends', 'both', 'flexible']
   },
   message: {
-    type: String
+    type: String,
+    required: true
   },
   status: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
   },
-  projects: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project'
-  }]
-}, {
-  timestamps: true
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model('Volunteer', volunteerSchema); 

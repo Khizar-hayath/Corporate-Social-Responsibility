@@ -1,19 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
+const { auth } = require('../middleware/auth');
+const checkRole = require('../middleware/checkRole');
 
-// Get all messages (admin only)
-router.get('/', async (req, res) => {
+// Get all contact messages (admin only)
+router.get('/', auth, checkRole(['admin']), async (req, res) => {
   try {
     const messages = await Contact.find().sort({ createdAt: -1 });
     res.json(messages);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching contact messages:', error);
+    res.status(500).json({ message: 'Error fetching contact messages' });
   }
 });
 
 // Get single message (admin only)
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, checkRole(['admin']), async (req, res) => {
   try {
     const message = await Contact.findById(req.params.id);
     if (!message) {
@@ -21,48 +24,71 @@ router.get('/:id', async (req, res) => {
     }
     res.json(message);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching contact message:', error);
+    res.status(500).json({ message: 'Error fetching contact message' });
   }
 });
 
-// Create contact message
+// Submit contact message (public route)
 router.post('/', async (req, res) => {
   try {
-    const message = new Contact(req.body);
-    const newMessage = await message.save();
-    res.status(201).json(newMessage);
+    console.log('Received contact form submission:', req.body);
+    
+    // Validate required fields
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !subject || !message) {
+      console.error('Missing required fields:', { name, email, subject, message });
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    const contact = new Contact({
+      name,
+      email,
+      subject,
+      message,
+      status: 'pending'
+    });
+    
+    const newContact = await contact.save();
+    console.log('Contact message saved successfully:', newContact);
+    
+    res.status(201).json(newContact);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error creating contact message:', error);
+    res.status(400).json({ message: 'Error creating contact message' });
   }
 });
 
-// Update message status (admin only)
-router.put('/:id/status', async (req, res) => {
+// Update contact message status (admin only)
+router.put('/:id/status', auth, checkRole(['admin']), async (req, res) => {
   try {
-    const message = await Contact.findByIdAndUpdate(
+    const { status } = req.body;
+    const contact = await Contact.findByIdAndUpdate(
       req.params.id,
-      { status: req.body.status },
+      { status },
       { new: true }
     );
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact message not found' });
     }
-    res.json(message);
+    res.json(contact);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error updating contact message status:', error);
+    res.status(400).json({ message: 'Error updating contact message status' });
   }
 });
 
-// Delete message (admin only)
-router.delete('/:id', async (req, res) => {
+// Delete contact message (admin only)
+router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
   try {
-    const message = await Contact.findByIdAndDelete(req.params.id);
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
+    const contact = await Contact.findByIdAndDelete(req.params.id);
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact message not found' });
     }
-    res.json({ message: 'Message deleted' });
+    res.json({ message: 'Contact message deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error deleting contact message:', error);
+    res.status(500).json({ message: 'Error deleting contact message' });
   }
 });
 

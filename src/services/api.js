@@ -53,7 +53,31 @@ export const projectsAPI = {
   getAll: () => api.get('/api/projects'),
   create: (projectData) => api.post('/admin/projects', projectData),
   update: (id, projectData) => api.put(`/admin/projects/${id}`, projectData),
-  delete: (id) => api.delete(`/admin/projects/${id}`),
+  delete: (id) => {
+    // Get the token for authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    // Get the user to determine the correct endpoint
+    const userJson = localStorage.getItem('user');
+    if (!userJson) {
+      throw new Error('User information not found');
+    }
+    
+    try {
+      const user = JSON.parse(userJson);
+      const baseUrl = user.userType === 'admin' ? '/admin/projects' : '/admin/projects';
+      
+      // Configure request with authentication headers
+      return api.delete(`${baseUrl}/${id}`);
+      // No need to add headers manually, the interceptor will handle it
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      throw new Error('Failed to determine user role');
+    }
+  },
 };
 
 export default api; 

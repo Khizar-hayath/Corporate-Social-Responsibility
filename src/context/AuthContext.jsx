@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      console.log('Attempting login with email:', email);
+      //console.log('Attempting login with email:', email);
       const response = await authAPI.login(email, password);
       const { token, user } = response.data;
 
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      throw "Invalid email or password";
     }
   };
 

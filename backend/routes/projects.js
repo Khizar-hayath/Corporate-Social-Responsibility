@@ -88,7 +88,7 @@ router.delete('/:id', auth, isNGO, async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this project' });
     }
 
-    await project.remove();
+    await Project.findByIdAndDelete(req.params.id);
     res.json({ message: 'Project deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
