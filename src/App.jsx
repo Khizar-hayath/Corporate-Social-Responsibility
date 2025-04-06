@@ -22,7 +22,6 @@ import AdminContact from './pages/admin/Contact';
 import AdminUsers from './pages/admin/Users';
 import AdminSettings from './pages/admin/Settings';
 import ProjectManagement from './pages/account/ProjectManagement';
-import ThemeShowcase from './theme/ThemeShowcase';
 
 // Layout wrapper component that conditionally renders Navbar and Footer
 const AppLayout = () => {
@@ -129,9 +128,6 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-
-              {/* Theme Showcase */}
-              <Route path="/theme" element={<ThemeShowcase />} />
             </Route>
           </Routes>
         </AuthProvider>

@@ -6,16 +6,11 @@ import { FiTarget, FiUsers, FiGlobe, FiArrowRight, FiTag, FiPlus, FiX, FiEdit2, 
 import ProjectForm from '../components/forms/ProjectForm';
 import { useAuth } from '../context/AuthContext';
 import { projectsAPI } from '../services/api';
-import { FaSearch } from 'react-icons/fa';
 
 function Projects() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [projectsRef, projectsInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.2,
-  });
-  const [filterRef, filterInView] = useInView({
     triggerOnce: true,
     threshold: 0.2,
   });
@@ -104,102 +99,59 @@ function Projects() {
   return (
     <PageTransition>
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-r from-primary-800 via-blue-700 to-indigo-900">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-10 right-20 w-80 h-80 rounded-full bg-blue-400 opacity-20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-indigo-600 opacity-10 blur-3xl"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 bg-gray-50 dark:bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-              className="text-4xl md:text-6xl font-bold text-white mb-6 text-shadow"
-            >
-              Our <span className="text-blue-300">Projects</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto"
-            >
-              Explore our innovative projects and initiatives making a difference
-              in communities around the world.
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="mt-8 flex flex-col sm:flex-row justify-center gap-4"
-            >
-              <button
-                onClick={() => projectsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn-primary px-8 py-3 rounded-lg shadow-lg hover:shadow-primary-500/50 transition-all"
-              >
-                View Projects
-              </button>
-              
-              <button
-                onClick={() => setShowForm(true)}
-                className="btn-outline-light px-8 py-3 rounded-lg border-2 border-white/80 text-white hover:bg-white/10 transition-all"
-              >
-                Submit a Project
-              </button>
-            </motion.div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              Our Projects
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Explore our ongoing initiatives and see how we're making a positive
+              impact in communities around the world.
+            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Search and Filter Section */}
-      <section className="py-12 bg-white dark:bg-gray-900 -mt-12 md:-mt-16 relative z-10 rounded-t-3xl">
+      {/* Projects Section */}
+      <section className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            ref={filterRef}
-            initial={{ opacity: 0 }}
-            animate={filterInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.8 }}
-            className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4"
-          >
-            <div className="relative w-full md:w-auto">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search projects..."
-                className="pl-10 pr-4 py-3 w-full md:w-80 rounded-lg border-2 border-gray-200 dark:border-gray-700 focus:border-primary-500 focus:ring-primary-500 bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-              />
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          {/* Search and Filter */}
+          <div className="mb-12">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search projects..."
+                  className="input w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {categories.map((category) => (
+                  <motion.button
+                    key={category.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
+                      activeCategory === category.id
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {category.label}
+                  </motion.button>
+                ))}
+              </div>
             </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {categories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveCategory(category.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-                    activeCategory === category.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {category.label}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
+          </div>
 
           {/* Project Form - Only visible for NGO users */}
           {user?.userType === 'ngo' && (

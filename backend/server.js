@@ -49,6 +49,7 @@ app.use('/api/news', require('./routes/news'));
 app.use('/api/volunteers', require('./routes/volunteers'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/projects', require('./routes/publicProjects'));
+app.use('/api/users', require('./routes/users'));
 
 // NGO Routes (protected by regular auth)
 app.use('/ngo/projects', require('./routes/projects'));
@@ -62,6 +63,7 @@ app.use('/admin/projects', require('./routes/projects'));
 app.use('/admin/news', require('./routes/news'));
 app.use('/admin/volunteers', require('./routes/volunteers'));
 app.use('/admin/contact', require('./routes/contact'));
+app.use('/admin/users', require('./routes/users'));
 
 // Handle 404 errors
 app.use((req, res) => {
