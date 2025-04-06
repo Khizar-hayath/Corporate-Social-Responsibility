@@ -92,8 +92,12 @@ function Home() {
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: 'easeOut' }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80 backdrop-blur-[4px]" />
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-800 via-purple-700 to-blue-900 backdrop-blur-[4px]" />
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+          {/* Add decorative elements */}
+          <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-secondary-500 opacity-20 blur-3xl"></div>
+          <div className="absolute bottom-40 right-20 w-80 h-80 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+          <div className="absolute top-40 right-40 w-40 h-40 rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
         </motion.div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -121,13 +125,13 @@ function Home() {
             >
               Transform Lives Through
               <motion.span 
-                className="text-primary-400 block drop-shadow-2xl"
+                className="text-yellow-300 block drop-shadow-2xl"
                 animate={{ 
                   scale: [1, 1.05, 1],
                   textShadow: [
-                    "0 0 20px rgba(59, 130, 246, 0.5)",
-                    "0 0 30px rgba(59, 130, 246, 0.8)",
-                    "0 0 20px rgba(59, 130, 246, 0.5)"
+                    "0 0 20px rgba(253, 224, 71, 0.5)",
+                    "0 0 30px rgba(253, 224, 71, 0.8)",
+                    "0 0 20px rgba(253, 224, 71, 0.5)"
                   ]
                 }}
                 transition={{ 
@@ -156,10 +160,10 @@ function Home() {
               className="flex flex-col sm:flex-row justify-center gap-4"
             >
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(253, 224, 71, 0.5)" }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/get-involved')}
-                className="btn-primary group bg-primary-600 hover:bg-primary-700 text-white shadow-xl"
+                className="bg-yellow-400 text-gray-900 hover:bg-yellow-300 px-8 py-3 rounded-lg shadow-lg font-semibold transition-all flex items-center justify-center"
               >
                 Get Started
                 <FiArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
@@ -168,7 +172,7 @@ function Home() {
                 whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255, 255, 255, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/about')}
-                className="btn-outline bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-md shadow-lg"
+                className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-md shadow-lg px-8 py-3 rounded-lg font-semibold transition-all"
               >
                 Learn More
               </motion.button>

@@ -63,15 +63,15 @@ function Navbar() {
     <nav
       className={`fixed w-full z-10 transition-all duration-300 ${
         isScrolled || isOpen
-          ? 'bg-white dark:bg-gray-900 shadow-md'
-          : 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm'
+          ? 'bg-gradient-to-r from-primary-700 via-blue-700 to-indigo-700 shadow-lg'
+          : 'bg-gradient-to-r from-primary-700/90 via-blue-700/90 to-indigo-700/90 backdrop-blur-sm'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-indigo-600">NGO Portal</span>
+              <span className="text-xl font-bold text-white">NGO Portal</span>
             </Link>
           </div>
 
@@ -82,13 +82,16 @@ function Navbar() {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-3 py-2 text-sm font-medium ${
+                  className={`relative px-3 py-2 text-sm font-medium group ${
                     location.pathname === link.path
-                      ? 'text-indigo-600 dark:text-indigo-400'
-                      : 'text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                      ? 'text-white font-bold'
+                      : 'text-white/90 hover:text-white'
                   }`}
                 >
                   {link.name}
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${
+                    location.pathname === link.path ? 'scale-x-100' : ''
+                  }`}></span>
                 </Link>
               ))}
             </div>
@@ -96,27 +99,27 @@ function Navbar() {
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none"
+              className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 focus:outline-none transition-colors duration-300"
             >
-              {darkMode ? <FiSun className="h-6 w-6" /> : <FiMoon className="h-6 w-6" />}
+              {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
             </button>
 
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="text-sm text-white">
                   Welcome, {user.name}
                 </span>
                 {dashboardLink && (
                   <Link
                     to={dashboardLink.path}
-                    className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    className="text-sm text-white/90 hover:text-white transition-colors duration-300"
                   >
                     {dashboardLink.label}
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-white hover:bg-gray-100 transition-colors duration-300"
                 >
                   <FiLogOut className="mr-2" />
                   Logout
@@ -126,13 +129,13 @@ function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="text-sm text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  className="text-sm text-white/90 hover:text-white transition-colors duration-300"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-white hover:bg-gray-100 transition-colors duration-300"
                 >
                   Register
                 </Link>
@@ -144,18 +147,18 @@ function Navbar() {
           <div className="flex items-center sm:hidden">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none"
+              className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 focus:outline-none transition-colors duration-300"
             >
-              {darkMode ? <FiSun className="h-6 w-6" /> : <FiMoon className="h-6 w-6" />}
+              {darkMode ? <FiSun className="h-5 w-5" /> : <FiMoon className="h-5 w-5" />}
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none"
+              className="ml-2 inline-flex items-center justify-center p-2 rounded-full bg-white/10 text-white hover:bg-white/20 focus:outline-none transition-colors duration-300"
             >
               {isOpen ? (
-                <FiX className="block h-6 w-6" />
+                <FiX className="block h-5 w-5" />
               ) : (
-                <FiMenu className="block h-6 w-6" />
+                <FiMenu className="block h-5 w-5" />
               )}
             </button>
           </div>
@@ -167,7 +170,7 @@ function Navbar() {
         initial={false}
         animate={{ height: isOpen ? 'auto' : 0 }}
         transition={{ duration: 0.3 }}
-        className="sm:hidden overflow-hidden"
+        className="sm:hidden overflow-hidden bg-gradient-to-b from-blue-800 to-primary-800"
       >
         <div className="pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (
@@ -177,8 +180,8 @@ function Navbar() {
               onClick={() => setIsOpen(false)}
               className={`block px-4 py-2 text-base font-medium ${
                 location.pathname === link.path
-                  ? 'text-indigo-600 dark:text-indigo-400'
-                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                  ? 'text-white bg-white/10'
+                  : 'text-white/90 hover:text-white hover:bg-white/5'
               }`}
             >
               {link.name}
@@ -186,16 +189,18 @@ function Navbar() {
           ))}
           {user ? (
             <>
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 pb-3">
+              <div className="border-t border-white/10 pt-4 pb-3">
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
-                    <FiUser className="h-6 w-6 text-gray-400" />
+                    <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <FiUser className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800 dark:text-white">
+                    <div className="text-base font-medium text-white">
                       {user.name}
                     </div>
-                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <div className="text-sm font-medium text-white/70">
                       {user.organization}
                     </div>
                   </div>
@@ -204,7 +209,7 @@ function Navbar() {
                   <Link
                     to={dashboardLink.path}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-2 text-base font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="block px-4 py-2 text-base font-medium text-white/90 hover:text-white hover:bg-white/5"
                   >
                     {dashboardLink.label}
                   </Link>
@@ -214,25 +219,25 @@ function Navbar() {
                     setIsOpen(false);
                     handleLogout();
                   }}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-white/90 hover:text-white hover:bg-white/5"
                 >
                   Logout
                 </button>
               </div>
             </>
           ) : (
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 pb-3">
+            <div className="border-t border-white/10 pt-4 pb-3">
               <Link
                 to="/login"
                 onClick={() => setIsOpen(false)}
-                className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="block px-4 py-2 text-base font-medium text-white/90 hover:text-white hover:bg-white/5"
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 onClick={() => setIsOpen(false)}
-                className="block px-4 py-2 text-base font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="block px-4 py-2 text-base font-medium text-white bg-white/10 hover:bg-white/15"
               >
                 Register
               </Link>

@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import { colors, typography, animations } from './src/theme/theme.js';
+
 export default {
   content: [
     "./index.html",
@@ -8,37 +10,55 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-        },
+        primary: colors.primary,
+        secondary: colors.secondary,
+        ...colors.accent,
+        gray: colors.neutral,
       },
-      fontFamily: {
-        sans: ['Inter var', 'sans-serif'],
-      },
+      fontFamily: typography.fontFamily,
+      fontSize: typography.fontSize,
+      fontWeight: typography.fontWeight,
+      lineHeight: typography.lineHeight,
+      letterSpacing: typography.letterSpacing,
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
+        'fade-out': 'fadeOut 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
+        'slide-down': 'slideDown 0.5s ease-out',
+        'float': 'float 3s ease-in-out infinite',
+        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'bounce': 'bounce 1s infinite',
       },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+      keyframes: animations.keyframes,
+      transitionTimingFunction: animations.easings,
+      transitionDuration: animations.durations,
+      transitionDelay: animations.delays,
+      // Add custom SCSS-like variables for more flexibility
+      '--primary-color': 'var(--primary-600)',
+      '--secondary-color': 'var(--secondary-600)',
+      '--accent-color': 'var(--blue-600)',
+      '--danger-color': 'var(--red-600)',
+      '--success-color': 'var(--green-600)',
+      '--warning-color': 'var(--yellow-600)',
+      // Add responsive container padding
+      container: {
+        center: true,
+        padding: {
+          DEFAULT: '1rem',
+          sm: '2rem',
+          lg: '4rem',
+          xl: '5rem',
+          '2xl': '6rem',
         },
       },
     },
   },
-  plugins: [],
+  // Add some useful plugins
+  plugins: [
+    // This adds responsive variants to the focus-visible plugin
+    function({ addVariant }) {
+      addVariant('hocus', ['&:hover', '&:focus']);
+      addVariant('group-hocus', ['.group:hover &', '.group:focus &']);
+    }
+  ],
 } 
