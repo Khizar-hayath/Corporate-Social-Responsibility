@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdminSidebar from '../../components/layout/AdminSidebar';
+import AdminHeader from '../../components/admin/AdminHeader';
 import SettingsForm from './components/settings/SettingsForm';
 
 function Settings() {
@@ -18,14 +19,10 @@ function Settings() {
           transition={{ duration: 0.5 }}
           className="space-y-8"
         >
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Site Settings
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Configure system settings and preferences
-            </p>
-          </div>
+          <AdminHeader 
+            title="Settings" 
+            subtitle="Configure your site preferences" 
+          />
           
           <SettingsForm />
         </motion.div>

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import UsersTable from './components/users/UsersTable';
+import AdminHeader from '../../components/admin/AdminHeader';
 
 /**
  * Admin User Management Page
@@ -27,14 +28,10 @@ function Users() {
           transition={{ duration: 0.5 }}
           className="space-y-8"
         >
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              User Management
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage users, assign roles, and control access to the system
-            </p>
-          </div>
+          <AdminHeader 
+            title="User Management" 
+            subtitle="Manage users, assign roles, and control access to the system" 
+          />
           
           <UsersTable />
         </motion.div>

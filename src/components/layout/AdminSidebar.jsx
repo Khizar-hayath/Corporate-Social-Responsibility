@@ -2,10 +2,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiHome, FiUsers, FiFileText, FiFolder, FiMail, FiHeart, FiSettings, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 function AdminSidebar() {
   const location = useLocation();
   const { logout } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   
   const menuItems = [
     { icon: FiHome, label: 'Dashboard', path: '/admin' },
@@ -20,7 +23,7 @@ function AdminSidebar() {
   return (
     <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-md">
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 px-4">
           <Link 
             to="/admin" 
             className="text-2xl font-bold text-primary-600 dark:text-primary-400"
@@ -53,6 +56,19 @@ function AdminSidebar() {
         </nav>
         
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center w-full px-4 py-2 mb-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {darkMode ? 
+              <FiSun className="w-5 h-5 mr-3" /> : 
+              <FiMoon className="w-5 h-5 mr-3" />
+            }
+            <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>
+          </button>
+          
           <button
             onClick={logout}
             className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"

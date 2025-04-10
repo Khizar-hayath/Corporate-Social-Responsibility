@@ -137,7 +137,7 @@ function ProjectManagement() {
               setEditingProject(null);
               setShowForm(true);
             }}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             <FiPlus className="mr-2 -ml-1" />
             Create New Project
@@ -161,7 +161,7 @@ function ProjectManagement() {
                 <input
                   type="text"
                   placeholder="Search projects..."
-                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-12 sm:text-sm border-gray-300 rounded-md"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -174,7 +174,7 @@ function ProjectManagement() {
                   onClick={() => setActiveCategory(category.id)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
                     activeCategory === category.id
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-primary-600 text-white'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >
@@ -206,7 +206,7 @@ function ProjectManagement() {
         {/* Projects List */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
           </div>
         ) : filteredProjects.length > 0 ? (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -216,7 +216,7 @@ function ProjectManagement() {
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="sm:flex sm:items-center">
-                        <p className="text-sm font-medium text-indigo-600 truncate">
+                        <p className="text-sm font-medium text-primary-600 truncate">
                           {project.title}
                         </p>
                         <div className="mt-2 sm:mt-0 sm:ml-6 flex-shrink-0 flex">
@@ -234,7 +234,7 @@ function ProjectManagement() {
                         </button>
                         <button
                           onClick={() => handleEdit(project)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-primary-600 hover:text-primary-900"
                         >
                           <FiEdit2 className="h-5 w-5" />
                         </button>

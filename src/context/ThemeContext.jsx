@@ -4,22 +4,28 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    // Check local storage first
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+      return savedMode === 'true';
+    }
+    // If nothing in localStorage, check user's preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
   useEffect(() => {
+    // Apply theme to document
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
     }
+    // Save to localStorage
+    localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
   const toggleTheme = () => {
-    setDarkMode(!darkMode);
+    setDarkMode(prevMode => !prevMode);
   };
 
   return (
@@ -35,4 +41,6 @@ export function useTheme() {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-} 
+}
+
+export default ThemeContext; 
