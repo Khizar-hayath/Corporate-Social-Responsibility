@@ -15,19 +15,19 @@ function Contact() {
     {
       icon: FiMail,
       title: 'Email',
-      content: 'contact@csrinitiative.com',
-      link: 'mailto:contact@csrinitiative.com',
+      content: 'HumaNest@csrinitiative.com',
+      link: 'mailto:HumaNest@csrinitiative.com',
     },
     {
       icon: FiPhone,
       title: 'Phone',
-      content: '+1 (555) 123-4567',
-      link: 'tel:+15551234567',
+      content: '+91 5004545454',
+      link: 'tel:+91 5004545454',
     },
     {
       icon: FiMapPin,
       title: 'Address',
-      content: '123 CSR Street, City, Country',
+      content: 'Hebbal, Bengaluru, India',
       link: 'https://maps.google.com',
     },
     {
@@ -120,7 +120,7 @@ function Contact() {
                   {/* Replace with your Google Maps embed */}
                   <iframe
                     title="Office Location"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.30603803104!2d-74.25986682528057!3d40.69714941971462!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sin!4v1625671649948!5m2!1sen!2sin"
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15558.789150645507!2d77.5946!3d12.9716!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670c2b1d1f9%3A0x7ed9c1b1b3a9b8b!2sBengaluru%2C%20Karnataka%2C%20India!5e0!3m2!1sen!2sin!4v1712814520000!5m2!1sen!2sin"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}

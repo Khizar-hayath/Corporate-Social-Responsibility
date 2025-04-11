@@ -91,7 +91,7 @@ function Projects() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -268,7 +268,7 @@ function Projects() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(project)}
-                          className="p-2 text-indigo-600 hover:text-indigo-800"
+                          className="p-2 text-primary-600 hover:text-primary-800"
                         >
                           <FiEdit2 />
                         </button>
