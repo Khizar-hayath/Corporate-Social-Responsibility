@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
-const { auth } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 
 // Get all contact messages (admin only)
-router.get('/', auth, checkRole(['admin']), async (req, res) => {
+router.get('/', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const messages = await Contact.find().sort({ createdAt: -1 });
     res.json(messages);
@@ -16,7 +16,7 @@ router.get('/', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Get single message (admin only)
-router.get('/:id', auth, checkRole(['admin']), async (req, res) => {
+router.get('/:id', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const message = await Contact.findById(req.params.id);
     if (!message) {
@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update contact message status (admin only)
-router.put('/:id/status', auth, checkRole(['admin']), async (req, res) => {
+router.put('/:id/status', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const contact = await Contact.findByIdAndUpdate(
@@ -79,7 +79,7 @@ router.put('/:id/status', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Delete contact message (admin only)
-router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
+router.delete('/:id', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const contact = await Contact.findByIdAndDelete(req.params.id);
     if (!contact) {

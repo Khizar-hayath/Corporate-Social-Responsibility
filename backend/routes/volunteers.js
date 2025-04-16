@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Volunteer = require('../models/Volunteer');
-const { auth } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 
 // Get all volunteers (admin only)
-router.get('/', auth, checkRole(['admin']), async (req, res) => {
+router.get('/', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const volunteers = await Volunteer.find().sort({ createdAt: -1 });
     res.json(volunteers);
@@ -16,7 +16,7 @@ router.get('/', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Get single volunteer (admin only)
-router.get('/:id', auth, checkRole(['admin']), async (req, res) => {
+router.get('/:id', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const volunteer = await Volunteer.findById(req.params.id).populate('projects');
     if (!volunteer) {
@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update volunteer status (admin only)
-router.put('/:id/status', auth, checkRole(['admin']), async (req, res) => {
+router.put('/:id/status', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const volunteer = await Volunteer.findByIdAndUpdate(
@@ -82,7 +82,7 @@ router.put('/:id/status', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Delete volunteer (admin only)
-router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
+router.delete('/:id', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const volunteer = await Volunteer.findByIdAndDelete(req.params.id);
     if (!volunteer) {
@@ -96,7 +96,7 @@ router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Add project to volunteer
-router.post('/:id/projects', async (req, res) => {
+router.post('/:id/projects', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const volunteer = await Volunteer.findById(req.params.id);
     if (!volunteer) {

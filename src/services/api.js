@@ -42,6 +42,102 @@ api.interceptors.response.use(
   }
 );
 
+// Gemini API configuration
+export const geminiAPI = {
+  // Replace with your actual Gemini API key when deploying
+  apiKey: 'YOUR_GEMINI_API_KEY',
+  
+  // Different model versions to try
+  models: {
+    gemini10Pro: 'gemini-1.0-pro',
+    gemini10ProVision: 'gemini-1.0-pro-vision',
+    gemini15Pro: 'gemini-1.5-pro',
+    gemini15Flash: 'gemini-1.5-flash'
+  },
+  
+  // Summarize comments
+  summarizeComments: async (comments, modelName = 'gemini-1.5-pro') => {
+    try {
+      // For demo purposes, we'll use a mock response
+      // In production, replace with an actual API call:
+      /*
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
+        {
+          contents: [{
+            parts: [{
+              text: `Please summarize these comments in 2-3 key points: ${comments.map(c => c.content).join(' | ')}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 300,
+          }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': geminiAPI.apiKey
+          }
+        }
+      );
+      return response.data.candidates[0].content.parts[0].text;
+      */
+      
+      // Mock response for testing
+      console.log(`Generating summary with model: ${modelName}`);
+      console.log(`Summarizing ${comments.length} comments`);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Return mock summary
+      return `Summary (using ${modelName}): ${comments.length} comments analyzed. The main topics discussed include ${getRandomTopics(comments)}. Most users seem to ${getRandomSentiment()}.`;
+    } catch (error) {
+      console.error('Error using Gemini API:', error);
+      throw error;
+    }
+  }
+};
+
+// Helper functions for mock summary generation
+function getRandomTopics(comments) {
+  const topics = [
+    'project goals and milestones', 
+    'design suggestions and feedback', 
+    'implementation challenges',
+    'timeline and scheduling concerns',
+    'positive feedback about the progress',
+    'questions about specific features'
+  ];
+  
+  // Get a random subset of topics
+  const topicCount = Math.min(1 + Math.floor(Math.random() * 3), topics.length);
+  const selectedTopics = [];
+  
+  while (selectedTopics.length < topicCount) {
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    if (!selectedTopics.includes(randomTopic)) {
+      selectedTopics.push(randomTopic);
+    }
+  }
+  
+  return selectedTopics.join(', ');
+}
+
+function getRandomSentiment() {
+  const sentiments = [
+    'be enthusiastic about the project',
+    'have constructive feedback to share',
+    'express interest in contributing to future efforts',
+    'appreciate the current progress',
+    'have questions about implementation details',
+    'suggest improvements to the current approach'
+  ];
+  
+  return sentiments[Math.floor(Math.random() * sentiments.length)];
+}
+
 // Auth API calls
 export const authAPI = {
   login: (email, password) => api.post('/api/auth/login', { email, password }),

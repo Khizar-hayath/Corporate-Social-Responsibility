@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { Link } from 'react-router-dom';
 import PageTransition from '../components/layout/PageTransition';
 import { FiTarget, FiUsers, FiGlobe, FiArrowRight, FiTag, FiPlus, FiX, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import ProjectForm from '../components/forms/ProjectForm';
@@ -281,13 +282,15 @@ function Projects() {
                       </div>
                     )}
                   </div>
-                  <motion.button
-                    whileHover={{ x: 5 }}
-                    className="btn-secondary inline-flex items-center"
-                  >
-                    Learn More
-                    <FiArrowRight className="ml-2" />
-                  </motion.button>
+                  <Link to={`/projects/${project._id}`}>
+                    <motion.button
+                      whileHover={{ x: 5 }}
+                      className="btn-secondary inline-flex items-center"
+                    >
+                      Learn More
+                      <FiArrowRight className="ml-2" />
+                    </motion.button>
+                  </Link>
                 </div>
               </motion.div>
             ))}

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
-const { auth, isNGO } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
 // Get all projects (public)
 router.get('/', async (req, res) => {
@@ -41,7 +41,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create project (NGO only)
-router.post('/', auth, isNGO, async (req, res) => {
+router.post('/', auth.required, auth.isNGO, async (req, res) => {
   try {
     const project = new Project({
       ...req.body,
@@ -55,7 +55,7 @@ router.post('/', auth, isNGO, async (req, res) => {
 });
 
 // Update project (NGO only)
-router.put('/:id', auth, isNGO, async (req, res) => {
+router.put('/:id', auth.required, auth.isNGO, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
@@ -76,7 +76,7 @@ router.put('/:id', auth, isNGO, async (req, res) => {
 });
 
 // Delete project (NGO only)
-router.delete('/:id', auth, isNGO, async (req, res) => {
+router.delete('/:id', auth.required, auth.isNGO, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {

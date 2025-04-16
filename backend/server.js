@@ -50,6 +50,7 @@ app.use('/api/volunteers', require('./routes/volunteers'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/projects', require('./routes/publicProjects'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api', require('./routes/comments'));
 
 // NGO Routes (protected by regular auth)
 app.use('/ngo/projects', require('./routes/projects'));

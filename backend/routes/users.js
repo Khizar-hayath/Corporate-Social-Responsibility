@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { auth } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 const bcrypt = require('bcryptjs');
 
 // Get all users (admin only)
-router.get('/', auth, checkRole(['admin']), async (req, res) => {
+router.get('/', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.json(users);
@@ -17,7 +17,7 @@ router.get('/', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Get single user (admin or same user)
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', auth.required, async (req, res) => {
   try {
     // Allow admins to access any user, but regular users can only access their own
     if (req.user.userType !== 'admin' && req.user.id !== req.params.id) {
@@ -36,7 +36,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Create new user (admin only)
-router.post('/', auth, checkRole(['admin']), async (req, res) => {
+router.post('/', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const { name, email, password, userType, organization } = req.body;
     
@@ -76,7 +76,7 @@ router.post('/', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Update user (admin or same user)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth.required, async (req, res) => {
   try {
     // Allow admins to update any user, but regular users can only update themselves
     if (req.user.userType !== 'admin' && req.user.id !== req.params.id) {
@@ -122,7 +122,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // Update user type (admin only)
-router.put('/:id/userType', auth, checkRole(['admin']), async (req, res) => {
+router.put('/:id/userType', auth.required, auth.isAdmin, async (req, res) => {
   try {
     const { userType } = req.body;
     
@@ -150,7 +150,7 @@ router.put('/:id/userType', auth, checkRole(['admin']), async (req, res) => {
 });
 
 // Delete user (admin only)
-router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
+router.delete('/:id', auth.required, auth.isAdmin, async (req, res) => {
   try {
     // Prevent deleting the last admin
     if (req.params.id !== req.user.id) {
