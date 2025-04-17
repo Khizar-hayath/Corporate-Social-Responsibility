@@ -52,26 +52,40 @@ export const geminiAPI = {
     gemini10Pro: 'gemini-1.0-pro',
     gemini10ProVision: 'gemini-1.0-pro-vision',
     gemini15Pro: 'gemini-1.5-pro',
-    gemini15Flash: 'gemini-1.5-flash'
+    gemini15Flash: 'gemini-1.5-flash',
+    gemini20FlashExp: 'Gemini 2.0 Flash Thinking Experimental 01-21'
   },
   
   // Summarize comments
-  summarizeComments: async (comments, modelName = 'gemini-1.5-pro') => {
+  summarizeComments: async (
+    comments, 
+    modelName = 'gemini-1.5-pro', 
+    options = {
+      temperature: 0.4,
+      maxOutputTokens: 350,
+      preInstructions: 'You are an AI assistant integrated into a CSR platform. Your task is to analyze user reviews and feedback submitted by NGOs, Corporates, and Community Members. Your goal is to perform sentiment analysis and classify each feedback as Positive, Neutral, or Negative. Also, extract the key themes, suggestions, or complaints if available. Keep the tone professional, the response concise, and focus on insights that can help improve platform experience, trust, and engagement.'
+    }
+  ) => {
     try {
       // For demo purposes, we'll use a mock response
       // In production, replace with an actual API call:
       /*
+      const { temperature, maxOutputTokens, preInstructions } = options;
+      const promptText = preInstructions 
+        ? `${preInstructions} ${comments.map(c => c.content).join(' | ')}`
+        : `Please summarize these comments in 2-3 key points. Do not include the name of the model in your response: ${comments.map(c => c.content).join(' | ')}`;
+
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`,
         {
           contents: [{
             parts: [{
-              text: `Please summarize these comments in 2-3 key points: ${comments.map(c => c.content).join(' | ')}`
+              text: promptText
             }]
           }],
           generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 300,
+            temperature,
+            maxOutputTokens,
           }
         },
         {
@@ -87,12 +101,16 @@ export const geminiAPI = {
       // Mock response for testing
       console.log(`Generating summary with model: ${modelName}`);
       console.log(`Summarizing ${comments.length} comments`);
+      console.log(`Model settings: temperature=${options.temperature}, maxTokens=${options.maxOutputTokens}`);
+      if (options.preInstructions) {
+        console.log(`Using custom instructions: ${options.preInstructions}`);
+      }
       
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Return mock summary
-      return `Summary (using ${modelName}): ${comments.length} comments analyzed. The main topics discussed include ${getRandomTopics(comments)}. Most users seem to ${getRandomSentiment()}.`;
+      // Return mock summary without model name
+      return `${comments.length} comments analyzed. The main topics discussed include ${getRandomTopics(comments)}. Most users seem to ${getRandomSentiment()}.`;
     } catch (error) {
       console.error('Error using Gemini API:', error);
       throw error;

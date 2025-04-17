@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 function CommentItem({ comment, onReply, onDelete, onEdit, onLike }) {
   const [showOptions, setShowOptions] = useState(false);
   const [showReplies, setShowReplies] = useState(true); // Default to showing replies
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { user } = useAuth();
   
   const isAuthor = user && user._id === comment.userId;
@@ -19,6 +20,12 @@ function CommentItem({ comment, onReply, onDelete, onEdit, onLike }) {
   console.log('Comment:', comment._id, 'Replies:', comment.replies ? comment.replies.length : 0);
 
   const hasReplies = comment.replies && comment.replies.length > 0;
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      onDelete(comment._id);
+    }
+  };
 
   return (
     <motion.div 
@@ -37,7 +44,17 @@ function CommentItem({ comment, onReply, onDelete, onEdit, onLike }) {
           </div>
         </div>
         
-        <div className="relative">
+        <div className="flex items-center">
+          {isAuthor && (
+            <button 
+              onClick={handleDelete}
+              className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 mr-2"
+              title="Delete comment"
+            >
+              <FiTrash2 />
+            </button>
+          )}
+          
           <button 
             onClick={() => setShowOptions(!showOptions)}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -86,33 +103,35 @@ function CommentItem({ comment, onReply, onDelete, onEdit, onLike }) {
         {comment.content}
       </div>
       
-      <div className="flex items-center text-sm">
-        <button 
-          onClick={() => onLike(comment._id)}
-          className={`flex items-center mr-4 ${
-            comment.liked ? 'text-primary-600' : 'text-gray-500 dark:text-gray-400'
-          } hover:text-primary-600 transition-colors`}
-        >
-          <FiThumbsUp className="mr-1" /> 
-          <span>{comment.likes || 0}</span>
-        </button>
-        
-        <button 
-          onClick={() => onReply(comment)}
-          className="flex items-center text-gray-500 dark:text-gray-400 hover:text-primary-600 transition-colors"
-        >
-          <FiMessageSquare className="mr-1" /> 
-          Reply {hasReplies && `(${comment.replies.length})`}
-        </button>
-        
-        {hasReplies && (
+      <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center">
           <button 
-            onClick={() => setShowReplies(!showReplies)}
-            className="ml-4 text-sm text-primary-600 hover:text-primary-700"
+            onClick={() => onLike(comment._id)}
+            className={`flex items-center mr-4 ${
+              comment.liked ? 'text-primary-600' : 'text-gray-500 dark:text-gray-400'
+            } hover:text-primary-600 transition-colors`}
           >
-            {showReplies ? 'Hide replies' : 'Show replies'}
+            <FiThumbsUp className="mr-1" /> 
+            <span>{comment.likes || 0}</span>
           </button>
-        )}
+          
+          <button 
+            onClick={() => onReply(comment)}
+            className="flex items-center text-gray-500 dark:text-gray-400 hover:text-primary-600 transition-colors"
+          >
+            <FiMessageSquare className="mr-1" /> 
+            Reply {hasReplies && `(${comment.replies.length})`}
+          </button>
+          
+          {hasReplies && (
+            <button 
+              onClick={() => setShowReplies(!showReplies)}
+              className="ml-4 text-sm text-primary-600 hover:text-primary-700"
+            >
+              {showReplies ? 'Hide replies' : 'Show replies'}
+            </button>
+          )}
+        </div>
       </div>
       
       {hasReplies && showReplies && (

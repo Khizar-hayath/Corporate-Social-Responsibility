@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiMessageCircle, FiFilter, FiChevronDown } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import CommentItem from './CommentItem';
 import CommentForm from './CommentForm';
+import CommentSummary from './CommentSummary';
 import api from '../../services/api';
 
 function CommentSection({ projectId }) {
@@ -113,7 +114,14 @@ function CommentSection({ projectId }) {
         });
       } catch (err) {
         console.error('Error deleting comment:', err);
-        setError('Failed to delete comment. Please try again.');
+        if (err.response?.status === 403) {
+          setError('You can only delete your own comments.');
+        } else {
+          setError('Failed to delete comment. Please try again.');
+        }
+        
+        // Clear error message after 3 seconds
+        setTimeout(() => setError(''), 3000);
       }
     }
   };
@@ -206,6 +214,20 @@ function CommentSection({ projectId }) {
     }
   };
 
+  // Get all comments including replies for summarization
+  const allComments = useMemo(() => {
+    const result = [...comments];
+    
+    // Add all replies to the array
+    comments.forEach(comment => {
+      if (comment.replies && comment.replies.length > 0) {
+        result.push(...comment.replies);
+      }
+    });
+    
+    return result;
+  }, [comments]);
+
   return (
     <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
       <div className="flex items-center justify-between mb-6">
@@ -272,6 +294,10 @@ function CommentSection({ projectId }) {
         <div className="p-4 mb-4 bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 rounded-md">
           {error}
         </div>
+      )}
+      
+      {comments.length > 0 && (
+        <CommentSummary comments={allComments} />
       )}
       
       <CommentForm onSubmit={handleAddComment} />
