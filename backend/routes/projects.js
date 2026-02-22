@@ -6,11 +6,15 @@ const auth = require('../middleware/auth');
 // Get all projects (public)
 router.get('/', async (req, res) => {
   try {
-    const { category, search } = req.query;
+    const { category, search, status } = req.query;
     let query = {};
 
     if (category) {
       query.category = category;
+    }
+
+    if (status && status !== 'all') {
+      query.status = status;
     }
 
     if (search) {
@@ -21,8 +25,10 @@ router.get('/', async (req, res) => {
     }
 
     const projects = await Project.find(query).sort({ createdAt: -1 });
+    console.log(`Found ${projects.length} projects for query:`, query);
     res.json(projects);
   } catch (error) {
+    console.error('Error in GET /projects:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -40,9 +46,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create project (NGO only)
-router.post('/', auth.required, auth.isNGO, async (req, res) => {
+// Create project (Admin or NGO)
+router.post('/', auth.required, async (req, res) => {
   try {
+    // Ensure only admins or NGOs can create projects
+    if (req.user.userType !== 'admin' && req.user.userType !== 'ngo') {
+      return res.status(403).json({ message: 'Access denied. Only admins or NGOs can create projects.' });
+    }
+    
     const project = new Project({
       ...req.body,
       createdBy: req.user._id
@@ -54,16 +65,16 @@ router.post('/', auth.required, auth.isNGO, async (req, res) => {
   }
 });
 
-// Update project (NGO only)
-router.put('/:id', auth.required, auth.isNGO, async (req, res) => {
+// Update project (Admin or NGO that created it)
+router.put('/:id', auth.required, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Only allow NGO that created the project to update it
-    if (project.createdBy.toString() !== req.user._id.toString()) {
+    // Allow admins to update any project or the NGO that created it
+    if (req.user.userType !== 'admin' && project.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this project' });
     }
 
@@ -75,16 +86,16 @@ router.put('/:id', auth.required, auth.isNGO, async (req, res) => {
   }
 });
 
-// Delete project (NGO only)
-router.delete('/:id', auth.required, auth.isNGO, async (req, res) => {
+// Delete project (Admin or NGO that created it)
+router.delete('/:id', auth.required, async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    // Only allow NGO that created the project to delete it
-    if (project.createdBy.toString() !== req.user._id.toString()) {
+    // Allow admins to delete any project or the NGO that created it
+    if (req.user.userType !== 'admin' && project.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this project' });
     }
 

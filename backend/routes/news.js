@@ -58,8 +58,13 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create a new news article
-router.post('/', auth.required, auth.isAdmin, async (req, res) => {
+router.post('/', auth.required, async (req, res) => {
   try {
+    // Check if user is admin or NGO
+    if (req.user.userType !== 'admin' && req.user.userType !== 'ngo') {
+      return res.status(403).json({ message: 'Access denied. Admin or NGO only.' });
+    }
+    
     const {
       title,
       excerpt,
@@ -99,11 +104,27 @@ router.post('/', auth.required, auth.isAdmin, async (req, res) => {
 });
 
 // Update a news article
-router.put('/:id', auth.required, auth.isAdmin, async (req, res) => {
+router.put('/:id', auth.required, async (req, res) => {
   try {
+    // Check if user is admin or NGO
+    if (req.user.userType !== 'admin' && req.user.userType !== 'ngo') {
+      return res.status(403).json({ message: 'Access denied. Admin or NGO only.' });
+    }
+    
     const id = req.params.id;
     if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid news ID' });
+    }
+    
+    // Find the news article first
+    const newsArticle = await News.findById(id);
+    if (!newsArticle) {
+      return res.status(404).json({ message: 'News article not found' });
+    }
+    
+    // If user is NGO, they can only edit their own news articles
+    if (req.user.userType === 'ngo' && newsArticle.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied. You can only edit your own news articles.' });
     }
     
     const {
@@ -145,8 +166,13 @@ router.put('/:id', auth.required, auth.isAdmin, async (req, res) => {
 });
 
 // Delete a news article
-router.delete('/:id', auth.required, auth.isAdmin, async (req, res) => {
+router.delete('/:id', auth.required, async (req, res) => {
   try {
+    // Check if user is admin or NGO
+    if (req.user.userType !== 'admin' && req.user.userType !== 'ngo') {
+      return res.status(403).json({ message: 'Access denied. Admin or NGO only.' });
+    }
+    
     const id = req.params.id;
     if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid news ID' });
@@ -155,6 +181,11 @@ router.delete('/:id', auth.required, auth.isAdmin, async (req, res) => {
     const news = await News.findById(id);
     if (!news) {
       return res.status(404).json({ message: 'News article not found' });
+    }
+    
+    // If user is NGO, they can only delete their own news articles
+    if (req.user.userType === 'ngo' && news.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied. You can only delete your own news articles.' });
     }
     
     await News.findByIdAndDelete(id);
